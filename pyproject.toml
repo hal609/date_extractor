@@ -3,8 +3,8 @@ requires = ["setuptools>=42", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "pretty_progress"
-version = "0.1.4"
+name = "date_extractor"
+version = "0.1.0"
 description = "A Python module to fuzzy extract dates from text corpuses."
 readme = "README.md"
 license = {text = "MIT License"}
