@@ -25,7 +25,7 @@ date_time_patterns_dict = {
     # 7. Ordinal Dates (e.g., 1st, 22nd, 30th)
     re.compile(r'\b\d{1,2}(?:st|nd|rd|th)\b', re.IGNORECASE): IndicatorType.DAY,
 
-    re.compile(r'\b(?:first|second|third|fourth|fifth|sixth|seventh|eighth|ninth|tenth|eleventh|twelfth|thirteenth)\b', re.IGNORECASE): IndicatorType.DAY,
+    re.compile(r'\b(?:first|second|third|fourth|fifth|sixth|seventh|eighth|ninth|tenth|eleventh|twelfth|thirteenth)\b', re.IGNORECASE): IndicatorType.DAY_WORD,
 
     # 8. Relative/Descriptive Time Words (e.g., today, tomorrow, ago, noon)
     re.compile(r'\b(?:noon|midnight|o\'clock|ago|now)\b', re.IGNORECASE): IndicatorType.TIME,
@@ -242,6 +242,13 @@ def format_token_groups(groups):
     group_start_locations = []
 
     for group in groups:
+        # If a group contains only a day word e.g. first second third then it is 
+        # likely not actually indicating a date and that group should be removed
+        # to prevent erroneously matching phrases such as: "the second time I went"
+        if len(group) == 1:
+            if group[0].time_type == IndicatorType.DAY_WORD:
+                continue
+            
         group_start_locations.append(min([token.pos for token in group]))
 
         if has_token_type(group, IndicatorType.DATE):

@@ -5,8 +5,9 @@ class IndicatorType(Enum):
     YEAR = 1
     MONTH = 2
     DAY = 3
-    WEEKDAY = 4
-    TIME = 5
+    DAY_WORD = 4 # e.g. First, Second, Third
+    WEEKDAY = 5 # e.g. Monday, Tuesday, Wednesday
+    TIME = 6
 
 # Class to store data about each token
 class DateIndicator:
