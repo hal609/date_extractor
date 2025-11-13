@@ -94,7 +94,7 @@ def group_tokens(text, tokens):
     words = text.split()
 
     # Define connecting words that can bridge gaps of 2
-    connecting_words = {"of", "the", "at", "on", "in"}
+    connecting_words = {"of", "the", "at", "on", "in", "at approximately", "at around", "around", "just after", "after", "just before", "at about", "about"}
 
     # Sort tokens by position
     sorted_tokens = sorted(tokens, key=lambda x: x.pos)
@@ -117,18 +117,24 @@ def group_tokens(text, tokens):
         if "." in previous_token_words: distance = 99
         
         if distance == 1:
-            # Adjacent → same group
+            # Adjacent so same group
             current_group.append(curr_token)
-        elif distance == 2:
-            # Check if the in-between word is a connecting word
-            between_word = words[prev_token.pos + last_token_space_count + 1]
-            if between_word.lower() in connecting_words:
+        elif distance <= 4: # Max distance to check for connecting words/phrases
+            # Check if the in-between word(s) are a connecting phrase
+            end_of_prev_token = prev_token.pos + last_token_space_count + 1
+            between_words = words[end_of_prev_token:end_of_prev_token + distance - 1]
+             # Join list into string
+            between_words = " ".join(between_words)
+
+            if between_words.lower() in connecting_words:
+                # If it's a connecting phrase then add it to the current group
                 current_group.append(curr_token)
             else:
+                # Otherwise add this complete group to the groups list and start a new group
                 groups.append(sorted(current_group))
                 current_group = [curr_token]
         else:
-            # Too far apart → new group
+            # Too far apart so new group
             groups.append(sorted(current_group))
             current_group = [curr_token]
 
