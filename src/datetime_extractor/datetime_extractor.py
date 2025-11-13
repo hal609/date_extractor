@@ -30,7 +30,7 @@ date_time_patterns_dict = {
     # 8. Relative/Descriptive Time Words (e.g., today, tomorrow, ago, noon)
     re.compile(r'\b(?:noon|midnight|o\'clock|ago|now)\b', re.IGNORECASE): IndicatorType.TIME,
 
-    re.compile(r'\b(?:today|tomorrow|yesterday|later|next day|same day|that day|following day|day later)\b', re.IGNORECASE): IndicatorType.DAY,
+    re.compile(r'\b(?:today|tomorrow|yesterday|later|next day|same day|that day|this day|following day|day later)\b', re.IGNORECASE): IndicatorType.DAY,
 
     # Match a given number of days later/after
     re.compile(r'\b(?:(?:\d+|one|two|three|four|five|six|seven|eight|nine|ten)\s+day[s]?\s+(?:later|after))\b', re.IGNORECASE): IndicatorType.DAY,
@@ -93,8 +93,33 @@ def find_dates(text):
 def group_tokens(text, tokens):
     words = text.split()
 
-    # Define connecting words that can bridge gaps of 2
-    connecting_words = {"of", "the", "at", "on", "in", "at approximately", "at around", "around", "just after", "after", "just before", "at about", "about"}
+    connecting_patterns = {
+        "SINGLE_WORD": r"^(of|the|at|on|in|around|after|about|from|before|almost)$",
+        "TWO_WORD": r"^(at|just|nearly|about|abouts|after|before)\s+(around|about|abouts|approximately|nearly|almost|past|before|from)",
+
+
+        "IN_FROM_ETC": r"^in(\s+the)?(\s+(early|late|mid))?(\s+(morning|afternoon|evening))?(\s+(just|approximately))?(\s+(from|after|around|at))$",
+
+        "EXPRNAME": r"^in(\s+the)?(\s+(early|late|mid))?\s+(hours|morning|afternoon|evening|night)\s+of$",
+        
+        # Phrases e.g. "at roughly the late afternoon", or "in the evening"
+        "PREP_TIME_OF": r"^(in|on|at|by|around|about)(\s+(roughly|approximately|about|around))?(\s+the)?(\s+(early|late|mid))?\s+(hours|morning|afternoon|evening|night)(\s+of)?(\s+the)?$",
+
+        # Concept: Pinpointing a time relative to a larger block.
+        # Example Phrases: "at the start of the day", "by the end of the week".
+        "START_END_OF": r"^(at|by|near)\s+the\s+(start|beginning|end)(\s+of)?(\s+the)?$",
+
+        "RANGE_TO": r"^(to|until|through|thru)$",
+        "RANGE_AND": r"^(and|&)$",
+
+        "TIME_OF": r"^(morning|afternoon|evening|night)\s+of$",
+        "OF_THE_ETC": r"^of\s+(the|this|next|last)$",
+        "OF_THE_SIMPLE": r"^of\s+the$",
+        "DAY_RELATIVE": r"^(day|week|month|year)\s+(before|after)$",
+        "THE_DAY_RELATIVE": r"^the\s+(day|week|month)\s+(before|after)$",
+        "ON_THE": r"^on\s+the$",
+        "IN_THE": r"^in\s+the$",
+    }
 
     # Sort tokens by position
     sorted_tokens = sorted(tokens, key=lambda x: x.pos)
@@ -119,18 +144,21 @@ def group_tokens(text, tokens):
         if distance == 1:
             # Adjacent so same group
             current_group.append(curr_token)
-        elif distance <= 4: # Max distance to check for connecting words/phrases
-            # Check if the in-between word(s) are a connecting phrase
+        elif distance <= 10: # Max distance to check for connecting words/phrases
+            # Check if the in-between word is a connecting word
             end_of_prev_token = prev_token.pos + last_token_space_count + 1
             between_words = words[end_of_prev_token:end_of_prev_token + distance - 1]
-             # Join list into string
-            between_words = " ".join(between_words)
-
-            if between_words.lower() in connecting_words:
-                # If it's a connecting phrase then add it to the current group
+            between_words_str = " ".join(between_words).lower()
+            is_connecting = False
+            for pattern in connecting_patterns.values():
+                # re.match() checks if the pattern matches from the *start* of the string.
+                # Since we use ^ and $ anchors, it ensures the *entire* string matches.
+                if re.match(pattern, between_words_str):
+                    is_connecting = True
+                    break # Found a match, no need to check other patterns
+            if is_connecting:
                 current_group.append(curr_token)
             else:
-                # Otherwise add this complete group to the groups list and start a new group
                 groups.append(sorted(current_group))
                 current_group = [curr_token]
         else:
@@ -205,8 +233,10 @@ def format_token_groups(groups):
     time = ""
 
     formatted_groups = []
+    group_start_locations = []
 
     for group in groups:
+        group_start_locations.append(group[0].pos)
 
         if has_token_type(group, IndicatorType.DATE):
             formatted_groups.append(get_token_type(group, IndicatorType.DATE))
@@ -243,8 +273,9 @@ def format_token_groups(groups):
                 new_day, 
                 re.IGNORECASE
             )
-            if new_day in ["that day", "same day"]:
-                continue
+            if new_day in ["that day", "same day", "this day", "today", "that afternoon", "this afternoon", "that morning", "this morning", "earlier on"]:
+                # Skip updating the day if the token indicates the day is the same as the previous
+                pass
             elif new_day in ["next day", "following day", "day after", "day later"]:
                 day = f"{int(day)+1:02}"
             elif offset_match:
@@ -281,5 +312,4 @@ def format_token_groups(groups):
 
         formatted_groups.append(composite_datetime)
 
-
-    return formatted_groups
+    return list(zip(formatted_groups, group_start_locations))
