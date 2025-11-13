@@ -105,14 +105,22 @@ def group_tokens(text, tokens):
         prev_token = sorted_tokens[i - 1]
         curr_token = sorted_tokens[i]
         distance = curr_token.pos - prev_token.pos
-        if "." in words[prev_token.pos]: distance = 99
+        
+        # If the last token had multiple words then the distance gets thrown off
+        # so subtract the number of spaces to compensate
+        last_token_space_count = prev_token.token.count(" ")
+        distance -= last_token_space_count
 
+        # Check for full stops in previous words and if so, always break the current group
+        previous_token_words = " ".join(words[prev_token.pos:prev_token.pos+last_token_space_count+1])
+        if "." in previous_token_words: distance = 99
+        
         if distance == 1:
             # Adjacent → same group
             current_group.append(curr_token)
         elif distance == 2:
             # Check if the in-between word is a connecting word
-            between_word = words[prev_token.pos + 1]
+            between_word = words[prev_token.pos + last_token_space_count + 1]
             if between_word.lower() in connecting_words:
                 current_group.append(curr_token)
             else:
@@ -196,10 +204,9 @@ def get_all_years(groups):
     return years
 
 def format_token_groups(groups):
-    # print(groups, "\n")
-    year = ""
-    month = ""
-    day = ""
+    year = "0000"
+    month = "00"
+    day = "00"
     time = ""
 
     formatted_groups = []
@@ -251,11 +258,14 @@ def format_token_groups(groups):
         
         composite_datetime = f"{year}-{month_dict[month.lower()]}-{day} {time}"
 
-        # Clear leading or trailing formatting characters
+        # Clear trailing formatting characters
         if composite_datetime[-1] in [" ", "-"]:
             composite_datetime = composite_datetime[:-1]
+        # Clear leading formatting characters
         if composite_datetime[0] in [" ", "-"]:
             composite_datetime = composite_datetime[1:]
+
+        # Add formatted datetime string to list
         formatted_groups.append(composite_datetime)
 
 
