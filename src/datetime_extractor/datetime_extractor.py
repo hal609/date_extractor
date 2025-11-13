@@ -182,8 +182,17 @@ def get_token_type(group, type: IndicatorType):
             return entry.token
     return ""
 
+def strip_leading_trailing_chars(datetime_string: str):
+    strip_chars = [" ", "-"]
+    while datetime_string[-1] in strip_chars:
+        datetime_string = datetime_string[:-1]
+    while datetime_string[0] in strip_chars:
+        datetime_string = datetime_string[1:]
+    
+    return datetime_string
+
 def format_token_groups(groups):
-    year = "0000"
+    year = ""
     month = "00"
     day = "00"
     weekday = ""
@@ -248,17 +257,17 @@ def format_token_groups(groups):
         
         if day.lower() in date_dict.keys():
             day = date_dict[day.lower()]
-
-        weekday = get_token_type(group, weekday)
+        
+        weekday = get_token_type(group, IndicatorType.WEEKDAY)
 
         if month.lower() in month_dict.keys():
             month = month_dict[month.lower()]
-        composite_datetime = f"{weekday} {year}-{month.lower()}-{day} {time_formatter(time)}"
 
-        while composite_datetime[-1] in [" ", "-"]:
-            composite_datetime = composite_datetime[:-1]
-        while composite_datetime[0] in [" ", "-"]:
-            composite_datetime = composite_datetime[1:]
+        composite_date = f"{year}-{month.lower()}-{day}"
+        composite_date =strip_leading_trailing_chars(composite_date)
+
+        composite_datetime = f"{weekday} {composite_date} {time_formatter(time)}"
+        composite_datetime = strip_leading_trailing_chars(composite_datetime)
 
         formatted_groups.append(composite_datetime)
 
