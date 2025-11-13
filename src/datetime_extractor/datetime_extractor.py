@@ -3,7 +3,7 @@ from .datetime_extraction_classes import *
 
 date_time_patterns_dict = {
     # 1. Full/Abbreviated Day Names (e.g., Mon, Monday)
-    re.compile(r'\b(?:Mon|Tue|Wed|Thu|Fri|Sat|Sun|Monday|Tuesday|Wednesday|Thursday|Friday|Saturday|Sunday)\b', re.IGNORECASE): IndicatorType.DAY,
+    re.compile(r'\b(?:Mon|Tue|Wed|Thu|Fri|Sat|Sun|Monday|Tuesday|Wednesday|Thursday|Friday|Saturday|Sunday)\b', re.IGNORECASE): IndicatorType.WEEKDAY,
 
     # 2. Full/Abbreviated Month Names (e.g., Jan, January)
     re.compile(r'\b(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec|January|February|March|April|June|July|August|September|October|November|December)\b', re.IGNORECASE): IndicatorType.MONTH,
@@ -15,11 +15,12 @@ date_time_patterns_dict = {
     # 4. Standalone Years (e.g., 1999, 2024)
     re.compile(r'\b(?:19|20)\d{2}\b'): IndicatorType.YEAR,
 
-    # 5. Times (e.g., 10:30, 10:30:45)
-    re.compile(r'\b\d{1,2}:\d{2}(?::\d{2})?\b'): IndicatorType.TIME,
-
-    # 6. AM/PM Indicators (e.g., 10:30 am, 10 am, 5PM)
-    re.compile(r'\b\d{1,2}(?::\d{2})?\s?(?:am|pm)\b', re.IGNORECASE): IndicatorType.TIME,
+    # 5. Times (e.g., 10:30, 10:30:45) + AM/PM Indicators (e.g., 10:30 am, 10 am, 5PM)
+    re.compile(
+        r'\b\d{1,2}(?::\d{2})?\s?(?:am|pm)\b' + # Match times in the format XX:XX
+        r'|' + # OR
+        r'\b\d{1,2}:\d{2}(?::\d{2})?\b', # Match times in the format XXpm, XX am, etc.
+        re.IGNORECASE): IndicatorType.TIME,
 
     # 7. Ordinal Dates (e.g., 1st, 22nd, 30th)
     re.compile(r'\b\d{1,2}(?:st|nd|rd|th)\b', re.IGNORECASE): IndicatorType.DAY,
@@ -137,90 +138,88 @@ def group_tokens(text, tokens):
 
     return groups
 
-def has_date(group):
-    for entry in group:
-        if entry.time_type == IndicatorType.DATE:
-            return True
-    return False
+def time_formatter(time_string: str):
+    time_string = time_string.replace(" ", "")
+    
+    if time_string in twenty_four_hour_time_dict.keys():
+        time_string = twenty_four_hour_time_dict[time_string]
 
-def get_date(group):
-    for entry in group:
-        if entry.time_type == IndicatorType.DATE:
-            return entry.token
-    return ""
+    hours_add = 0
+    if "pm" in time_string.lower():
+        hours_add = 12
+    
+    time_string = time_string.replace("am", "")
+    time_string = time_string.replace("pm", "")
+
+    split = time_string.split(":")
+    for i, part in enumerate(split):
+        if not part.isnumeric():
+            split[i] = ""
+    
+    hours = split[0]
+    if len(hours) == 0:
+        return ""
+    
+    mins = "00"
+
+    if len(split) > 1:
+        mins = split[1]
+
+    hours = (int(hours)+hours_add)%24
+    
+    return f"{hours:02}:{(mins):02}"
+
         
-def has_year(group):
+def has_token_type(group, type: IndicatorType):
     for entry in group:
-        if entry.time_type == IndicatorType.YEAR:
+        if entry.time_type == type:
             return True
     return False
 
-def get_year(group):
+def get_token_type(group, type: IndicatorType):
     for entry in group:
-        if entry.time_type == IndicatorType.YEAR:
+        if entry.time_type == type:
             return entry.token
     return ""
-        
-def has_month(group):
-    for entry in group:
-        if entry.time_type == IndicatorType.MONTH:
-            return True
-    return False
-
-def get_month(group):
-    for entry in group:
-        if entry.time_type == IndicatorType.MONTH:
-            return entry.token
-    return ""
-
-def has_day(group):
-    for entry in group:
-        if entry.time_type == IndicatorType.DAY:
-            return True
-    return False
-
-def get_day(group):
-    for entry in group:
-        if entry.time_type == IndicatorType.DAY:
-            return entry.token
-    return ""
-        
-def has_time(group):
-    for entry in group:
-        if entry.time_type == IndicatorType.TIME:
-            return True
-    return False
-
-def get_time(group):
-    for entry in group:
-        if entry.time_type == IndicatorType.TIME:
-            return entry.token
-    return ""
-        
-def get_all_years(groups):
-    years = []
-    for group in groups:
-        years.append(get_year(group))
-    return years
 
 def format_token_groups(groups):
     year = "0000"
     month = "00"
     day = "00"
+    weekday = ""
     time = ""
 
     formatted_groups = []
 
     for group in groups:
-        if has_date(group):
-            formatted_groups.append(get_date(group))
+
+        if has_token_type(group, IndicatorType.DATE):
+            formatted_groups.append(get_token_type(group, IndicatorType.DATE))
             continue
-        if has_year(group):
-            year = get_year(group)
-        if has_month(group):
-            month = get_month(group)
-        if has_day(group):
-            new_day = get_day(group)
+        if has_token_type(group, IndicatorType.YEAR):
+            new_year = get_token_type(group, IndicatorType.YEAR)
+            # If the next date is in a new year then reset all lower level info e.g. month and day and update year
+            if new_year != year: 
+                month = ""
+                day = ""
+                time = ""
+                year = new_year
+
+        if has_token_type(group, IndicatorType.MONTH):
+            new_month = get_token_type(group, IndicatorType.MONTH)
+            # If the next date is in a new month then reset all lower level info e.g. day, and update month
+            if new_month != month:
+                day = ""
+                time = ""
+                month = new_month
+
+        if has_token_type(group, IndicatorType.DAY):
+            new_day = get_token_type(group, IndicatorType.DAY)
+            
+            # If day has changed then clear out previous time
+            if new_day != day:
+                time = ""
+
             offset_match = re.match(
                 r'(\d+|one|two|three|four|five|six|seven|eight|nine|ten)\s+day[s]?\s+(later|after)', 
                 new_day, 
@@ -229,13 +228,7 @@ def format_token_groups(groups):
             if new_day in ["that day", "same day"]:
                 continue
             elif new_day in ["next day", "following day", "day after", "day later"]:
-                
-                if day.isnumeric():
-                    day = f"{int(day)+1:02}"
-                else: # If previous day was a weekday e.g. "Saturday" then
-                    if is_day_of_the_week(day):
-                        day = days_of_the_week[days_of_the_week.index(day.lower()) + 1].capitalize()
-
+                day = f"{int(day)+1:02}"
             elif offset_match:
                 number_str = offset_match.group(1)
                 
@@ -250,22 +243,23 @@ def format_token_groups(groups):
             else:
                 day = new_day
 
-        if has_time(group):
-            time = get_time(group)
+        if has_token_type(group, IndicatorType.TIME):
+            time = get_token_type(group, IndicatorType.TIME)
         
         if day.lower() in date_dict.keys():
             day = date_dict[day.lower()]
-        
-        composite_datetime = f"{year}-{month_dict[month.lower()]}-{day} {time}"
 
-        # Clear trailing formatting characters
-        if composite_datetime[-1] in [" ", "-"]:
+        weekday = get_token_type(group, weekday)
+
+        if month.lower() in month_dict.keys():
+            month = month_dict[month.lower()]
+        composite_datetime = f"{weekday} {year}-{month.lower()}-{day} {time_formatter(time)}"
+
+        while composite_datetime[-1] in [" ", "-"]:
             composite_datetime = composite_datetime[:-1]
-        # Clear leading formatting characters
-        if composite_datetime[0] in [" ", "-"]:
+        while composite_datetime[0] in [" ", "-"]:
             composite_datetime = composite_datetime[1:]
 
-        # Add formatted datetime string to list
         formatted_groups.append(composite_datetime)
 
 
