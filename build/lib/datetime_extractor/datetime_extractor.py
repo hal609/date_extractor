@@ -81,18 +81,17 @@ def find_dates(text):
         for i, w in enumerate(words):
             # Skip previously matched entries to prevent collisions
             if i in located_positions: continue
-            
-            w_to_check = w
+
+            # If the token has multiple words then check sequences of that number of words
+            num_words = token.count(" ") + 1
+
+            # Although it looks like this will overflow the words list, python just handles trying to slice beyond the end
+            w_to_check = " ".join(words[i:i+num_words])
 
             # Strip extra characters to ensure indicators are located correctly in text recognition 
             w_to_check = w_to_check.replace(".", "")
             w_to_check = w_to_check.replace(",", "")
             w_to_check = w_to_check.replace(" ", "")
-
-            # If the token has multiple words then check sequences of that number of words
-            num_words = token.count(" ") + 1
-            # Although it looks like this will overflow the words list, python just handles trying to slice beyond the end
-            w_to_check = " ".join(words[i:i+num_words])
 
             if token == w_to_check:
                 if token_running_counts[token] == token_counts[token]: break
@@ -101,7 +100,6 @@ def find_dates(text):
                 tokens.append(DateIndicator(token, i, token_type))
                 if token_running_counts[token] == token_counts[token]: break
     
-
     groups = group_tokens(text, tokens)
     formatted_groups = format_token_groups(groups)
 
