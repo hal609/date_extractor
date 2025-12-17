@@ -1,7 +1,7 @@
 import re
 from copy import deepcopy
 
-from extraction_classes import (
+from .extraction_classes import (
     DateIndicator,
     IndicatorType,
     date_dict,
