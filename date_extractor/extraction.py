@@ -54,7 +54,7 @@ date_time_patterns_dict = {
 }
 
 
-def find_date_time_indicators(text):
+def find_date_time_indicators(text: str) -> list[DateIndicator]:
     found_list = []
     for pattern in date_time_patterns_dict:
         matches = pattern.findall(text)
@@ -165,7 +165,7 @@ def find_dates(text: str) -> list[tuple[str, int]]:
     return formatted_groups
 
 
-def group_tokens(text, tokens):
+def group_tokens(text: str, tokens: list[DateIndicator]) -> list[list[DateIndicator]]:
     words = text.split()
 
     connecting_patterns = {
@@ -241,7 +241,7 @@ def group_tokens(text, tokens):
     return groups
 
 
-def time_formatter(time_string: str):
+def time_formatter(time_string: str) -> str:
     time_string = time_string.replace(" ", "")
 
     if time_string in twenty_four_hour_time_dict:
@@ -268,23 +268,23 @@ def time_formatter(time_string: str):
     if len(split) > 1:
         mins = split[1]
 
-    hours = (int(hours) + hours_add) % 24
+    hours_num = (int(hours) + hours_add) % 24
 
-    return f"{hours:02}:{(mins):02}"
+    return f"{hours_num:02}:{(mins):02}"
 
 
-def has_token_type(group, tok_type: IndicatorType):
+def has_token_type(group: list[DateIndicator], tok_type: IndicatorType) -> bool:
     return any(entry.time_type == tok_type for entry in group)
 
 
-def get_token_type(group, tok_type: IndicatorType):
+def get_token_type(group: list[DateIndicator], tok_type: IndicatorType) -> str:
     for entry in group:
         if entry.time_type == tok_type:
             return entry.token
     return ""
 
 
-def strip_leading_trailing_chars(datetime_string: str):
+def strip_leading_trailing_chars(datetime_string: str) -> str:
     strip_chars = [" ", "-"]
     while datetime_string[-1] in strip_chars:
         datetime_string = datetime_string[:-1]
@@ -294,7 +294,7 @@ def strip_leading_trailing_chars(datetime_string: str):
     return datetime_string
 
 
-def format_token_groups(groups):
+def format_token_groups(groups: list[list[DateIndicator]]) -> list[tuple[str, int]]:
     year = ""
     month = "00"
     day = "00"

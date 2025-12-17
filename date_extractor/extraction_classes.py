@@ -1,5 +1,5 @@
 from enum import Enum
-
+import typing
 
 class IndicatorType(Enum):
     DATE = 0
@@ -18,31 +18,35 @@ class DateIndicator:
         self.pos: int = position
         self.time_type: IndicatorType = time_type
 
-    def check_type(self):
+    def check_type(self) -> None:
         print(self.time_type, type(self.time_type))
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"({self.token}, loc: {self.pos}, time_type: '{self.time_type}')"
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return self.__str__()
 
-    def __lt__(self, other):
-        return self.time_type.value < other.time_type.value
+    def __lt__(self, other: "DateIndicator") -> bool:
+        return (self.time_type.value < other.time_type.value)
 
-    def __gt__(self, other):
+    def __gt__(self, other: "DateIndicator") -> bool:
         return self.time_type.value > other.time_type.value
 
-    def __le__(self, other):
+    def __le__(self, other: "DateIndicator") -> bool:
         return self.time_type.value <= other.time_type.value
 
-    def __ge__(self, other):
+    def __ge__(self, other: "DateIndicator") -> bool:
         return self.time_type.value >= other.time_type.value
 
-    def __eq__(self, other):
+    def __eq__(self, other: object) -> bool:
+        if not isinstance(other, DateIndicator):
+            return NotImplemented
         return self.time_type.value == other.time_type.value
-
-    def __ne__(self, other):
+    
+    def __ne__(self, other: object) -> bool:
+        if not isinstance(other, DateIndicator):
+            return NotImplemented
         return self.time_type.value != other.time_type.value
 
 
@@ -170,5 +174,5 @@ twenty_four_hour_time_dict = {
 }
 
 
-def is_day_of_the_week(text: str):
+def is_day_of_the_week(text: str) -> bool:
     return text.lower() in days_of_the_week
