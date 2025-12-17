@@ -1,20 +1,74 @@
-# date_extractor
+# date-extractor
 
-A Python module to fuzzy extract dates from a corpus of text.
+[![Release](https://img.shields.io/github/v/release/hal609/date-extractor)](https://img.shields.io/github/v/release/hal609/date-extractor)
+[![Build status](https://img.shields.io/github/actions/workflow/status/hal609/date-extractor/main.yml?branch=main)](https://github.com/hal609/date-extractor/actions/workflows/main.yml?query=branch%3Amain)
+[![codecov](https://codecov.io/gh/hal609/date-extractor/branch/main/graph/badge.svg)](https://codecov.io/gh/hal609/date-extractor)
+[![Commit activity](https://img.shields.io/github/commit-activity/m/hal609/date-extractor)](https://img.shields.io/github/commit-activity/m/hal609/date-extractor)
+[![License](https://img.shields.io/github/license/hal609/date-extractor)](https://img.shields.io/github/license/hal609/date-extractor)
 
-## Installation
+This is a template repository for Python projects that use uv for their dependency management.
 
+- **Github repository**: <https://github.com/hal609/date-extractor/>
+- **Documentation** <https://hal609.github.io/date-extractor/>
+
+## Getting started with your project
+
+### 1. Create a New Repository
+
+First, create a repository on GitHub with the same name as this project, and then run the following commands:
+
+```bash
+git init -b main
+git add .
+git commit -m "init commit"
+git remote add origin git@github.com:hal609/date-extractor.git
+git push -u origin main
 ```
-pip install date_extractor
+
+### 2. Set Up Your Development Environment
+
+Then, install the environment and the pre-commit hooks with
+
+```bash
+make install
 ```
 
-## Usage
+This will also generate your `uv.lock` file
 
-```python
-from date_extractor import find_dates
+### 3. Run the pre-commit hooks
 
-print(find_dates("A thing happened on Jan 1st 2012 and Jan 2nd 2012, and also january 15th at 12am in 2018."))
+Initially, the CI/CD pipeline might be failing due to formatting issues. To resolve those run:
 
-# Output
-['2012-01-1st', '2012-01-2nd', '2018-01-15th 12am']
+```bash
+uv run pre-commit run -a
 ```
+
+### 4. Commit the changes
+
+Lastly, commit the changes made by the two steps above to your repository.
+
+```bash
+git add .
+git commit -m 'Fix formatting issues'
+git push origin main
+```
+
+You are now ready to start development on your project!
+The CI/CD pipeline will be triggered when you open a pull request, merge to main, or when you create a new release.
+
+To finalize the set-up for publishing to PyPI, see [here](https://fpgmaas.github.io/cookiecutter-uv/features/publishing/#set-up-for-pypi).
+For activating the automatic documentation with MkDocs, see [here](https://fpgmaas.github.io/cookiecutter-uv/features/mkdocs/#enabling-the-documentation-on-github).
+To enable the code coverage reports, see [here](https://fpgmaas.github.io/cookiecutter-uv/features/codecov/).
+
+## Releasing a new version
+
+- Create an API Token on [PyPI](https://pypi.org/).
+- Add the API Token to your projects secrets with the name `PYPI_TOKEN` by visiting [this page](https://github.com/hal609/date-extractor/settings/secrets/actions/new).
+- Create a [new release](https://github.com/hal609/date-extractor/releases/new) on Github.
+- Create a new tag in the form `*.*.*`.
+
+For more details, see [here](https://fpgmaas.github.io/cookiecutter-uv/features/cicd/#how-to-trigger-a-release).
+
+---
+
+Repository initiated with [fpgmaas/cookiecutter-uv](https://github.com/fpgmaas/cookiecutter-uv).

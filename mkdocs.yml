@@ -1,0 +1,51 @@
+site_name: date-extractor
+repo_url: https://github.com/hal609/date-extractor
+site_url: https://hal609.github.io/date-extractor
+site_description: This is a template repository for Python projects that use uv for their dependency management.
+site_author: Hal Kolb
+edit_uri: edit/main/docs/
+repo_name: hal609/date-extractor
+copyright: Maintained by <a href="https://hal609.com">hal609</a>.
+
+nav:
+  - Home: index.md
+plugins:
+  - search
+  - mkdocstrings:
+      handlers:
+        python:
+          paths: ["date_extractor"]
+theme:
+  name: material
+  feature:
+    tabs: true
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: white
+      accent: deep orange
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: black
+      accent: deep orange
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+  icon:
+    repo: fontawesome/brands/github
+
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/hal609/date-extractor
+    - icon: fontawesome/brands/python
+      link: https://pypi.org/project/date-extractor
+
+markdown_extensions:
+  - toc:
+      permalink: true
+  - pymdownx.arithmatex:
+      generic: true
