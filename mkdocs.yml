@@ -9,6 +9,7 @@ copyright: Maintained by <a href="https://hal609.com">hal609</a>.
 
 nav:
   - Home: index.md
+  - Modules: modules.md
 plugins:
   - search
   - mkdocstrings:

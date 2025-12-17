@@ -1,13 +1,15 @@
 from enum import Enum
 
+
 class IndicatorType(Enum):
     DATE = 0
     YEAR = 1
     MONTH = 2
     DAY = 3
-    DAY_WORD = 4 # e.g. First, Second, Third
-    WEEKDAY = 5 # e.g. Monday, Tuesday, Wednesday
+    DAY_WORD = 4  # e.g. First, Second, Third
+    WEEKDAY = 5  # e.g. Monday, Tuesday, Wednesday
     TIME = 6
+
 
 # Class to store data about each token
 class DateIndicator:
@@ -18,13 +20,13 @@ class DateIndicator:
 
     def check_type(self):
         print(self.time_type, type(self.time_type))
-    
+
     def __str__(self):
         return f"({self.token}, loc: {self.pos}, time_type: '{self.time_type}')"
-    
+
     def __repr__(self):
         return self.__str__()
-    
+
     def __lt__(self, other):
         return self.time_type.value < other.time_type.value
 
@@ -33,16 +35,17 @@ class DateIndicator:
 
     def __le__(self, other):
         return self.time_type.value <= other.time_type.value
-    
+
     def __ge__(self, other):
         return self.time_type.value >= other.time_type.value
-    
+
     def __eq__(self, other):
         return self.time_type.value == other.time_type.value
-    
+
     def __ne__(self, other):
         return self.time_type.value != other.time_type.value
-    
+
+
 month_dict = {
     "january": "01",
     "jan": "01",
@@ -113,20 +116,20 @@ date_dict = {
     "28th": "28",
     "29th": "29",
     "30th": "30",
-    "31st": "31"
+    "31st": "31",
 }
 
 number_map = {
     "one": 1,
-    "two": 2, 
-    "three": 3, 
-    "four": 4, 
+    "two": 2,
+    "three": 3,
+    "four": 4,
     "five": 5,
     "six": 6,
     "seven": 7,
     "eight": 8,
     "nine": 9,
-    "ten": 10
+    "ten": 10,
 }
 
 days_of_the_week = [
@@ -163,11 +166,9 @@ twenty_four_hour_time_dict = {
     "2100": "21:00",
     "2200": "22:00",
     "2300": "23:00",
-    "2400": "24:00"
+    "2400": "24:00",
 }
 
+
 def is_day_of_the_week(text: str):
-    if text.lower() in days_of_the_week:
-        return True
-    else:
-        return False
+    return text.lower() in days_of_the_week
