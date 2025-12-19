@@ -1,5 +1,5 @@
 from enum import Enum
-import typing
+
 
 class IndicatorType(Enum):
     DATE = 0
@@ -28,7 +28,7 @@ class DateIndicator:
         return self.__str__()
 
     def __lt__(self, other: "DateIndicator") -> bool:
-        return (self.time_type.value < other.time_type.value)
+        return self.time_type.value < other.time_type.value
 
     def __gt__(self, other: "DateIndicator") -> bool:
         return self.time_type.value > other.time_type.value
@@ -43,7 +43,7 @@ class DateIndicator:
         if not isinstance(other, DateIndicator):
             return NotImplemented
         return self.time_type.value == other.time_type.value
-    
+
     def __ne__(self, other: object) -> bool:
         if not isinstance(other, DateIndicator):
             return NotImplemented
