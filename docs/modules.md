@@ -1,2 +1,2 @@
-::: date_extractor.find_dates
-::: date_extractor.strip_dates
+::: date_fuzz.find_dates
+::: date_fuzz.strip_dates

@@ -172,7 +172,7 @@ wheels = [
 ]
 
 [[package]]
-name = "date-extractor"
+name = "date-fuzz"
 version = "0.0.1"
 source = { editable = "." }
 

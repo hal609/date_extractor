@@ -1,10 +1,10 @@
-site_name: date-extractor
-repo_url: https://github.com/hal609/date-extractor
-site_url: https://hal609.github.io/date-extractor
+site_name: date-fuzz
+repo_url: https://github.com/hal609/date-fuzz
+site_url: https://hal609.github.io/date-fuzz
 site_description: This is a template repository for Python projects that use uv for their dependency management.
 site_author: Hal Kolb
 edit_uri: edit/main/docs/
-repo_name: hal609/date-extractor
+repo_name: hal609/date-fuzz
 copyright: Maintained by <a href="https://hal609.com">hal609</a>.
 
 nav:
@@ -15,7 +15,7 @@ plugins:
   - mkdocstrings:
       handlers:
         python:
-          paths: ["date_extractor"]
+          paths: ["date_fuzz"]
 theme:
   name: material
   feature:
@@ -41,9 +41,9 @@ theme:
 extra:
   social:
     - icon: fontawesome/brands/github
-      link: https://github.com/hal609/date-extractor
+      link: https://github.com/hal609/date-fuzz
     - icon: fontawesome/brands/python
-      link: https://pypi.org/project/date-extractor
+      link: https://pypi.org/project/date-fuzz
 
 markdown_extensions:
   - toc:
